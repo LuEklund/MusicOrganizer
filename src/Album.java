@@ -8,15 +8,19 @@ public class Album {
     Set<Album> subAlbums = new HashSet<Album>();
     Set<SoundClip> soundClips = new HashSet<SoundClip>();;
 
+    // Constructors intialize name
     public Album(String inName) {
         name = inName;
     }
 
+    // Add sound clip to album and propagate to parent
     void addSoundClip(SoundClip soundClip) {
         soundClips.add(soundClip);
         if (parent != null)
             parent.addSoundClip(soundClip);
     }
+
+    // Remove sound clip from album and propagate to each sub album
     void removeSoundClip(SoundClip soundClip) {
         if (soundClips.contains(soundClip))
         {
@@ -27,26 +31,39 @@ public class Album {
         }
 
     }
+
+    //Check if album contains sound clip
     boolean containsSoundClip(SoundClip soundClip) {
         return soundClips.contains(soundClip);
     }
 
+    // Add sub album to album and set parent to this album
     void addSubAlbum(Album album) {
         album.parent = this;
         subAlbums.add(album);
     }
-    void removeSubAlbum(Album album) {
+
+    // Remove sub album from album
+    void removeAlbum(Album album) {
         if (subAlbums.contains(album))
+        {
+            album.removeSubAlbums();
             subAlbums.remove(album);
+        }
     }
+
+    // Remove all sub albums
+    void removeSubAlbums() {
+        for (Album album : subAlbums) {
+            album.removeSubAlbums();
+        }
+        subAlbums.clear();
+        soundClips.clear();
+    }
+
+    // Check if album contains sub album
     boolean containsSubAlbum(Album album) {
         return subAlbums.contains(album);
     }
 
-    void removeAlbum(Album album) {
-        for (Album album : subAlbums) {
-            album.removeSubAlbum();
-            subAlbums.remove(album);
-        }
-    }
 }

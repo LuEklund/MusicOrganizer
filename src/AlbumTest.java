@@ -9,6 +9,7 @@ public class AlbumTest {
     private Album rootAlbum;
     private Album subAlbum1;
     private Album subAlbum2;
+    private Album subAlbum3;
     private SoundClip clip1;
     private SoundClip clip2;
 
@@ -17,6 +18,7 @@ public class AlbumTest {
         rootAlbum = new Album("Root");
         subAlbum1 = new Album("Album-1");
         subAlbum2 = new Album("Album-2");
+        subAlbum3 = new Album("Album-3");
 
 
         clip1 = new SoundClip(new File("Music/Context Sensitive - 20XX - 01 Thermal.wav"));
@@ -72,7 +74,7 @@ public class AlbumTest {
     @Test
     public void testRemoveSubAlbum() {
         rootAlbum.addSubAlbum(subAlbum1);
-        rootAlbum.removeSubAlbum(subAlbum1);
+        rootAlbum.removeAlbum(subAlbum1);
         assertFalse(rootAlbum.containsSubAlbum(subAlbum1));
     }
 
@@ -101,6 +103,7 @@ public class AlbumTest {
         assertFalse(subAlbum2.soundClips.contains(clip2));
     }
 
+    // sound clips removal test
     @Test
     public void testSoundClipRemove() {
         rootAlbum.addSubAlbum(subAlbum1);
@@ -118,6 +121,35 @@ public class AlbumTest {
         assertFalse(subAlbum2.soundClips.contains(clip2));
     }
 
+    //MEGA album test
+    @Test
+    public void testChainRemoval() {
+        rootAlbum.addSubAlbum(subAlbum1);
+        subAlbum1.addSubAlbum(subAlbum2);
+        subAlbum2.addSubAlbum(subAlbum3);
+
+        subAlbum3.addSoundClip(clip1);
+        //ALL albums should contain sound clip1
+        assertTrue(rootAlbum.soundClips.contains(clip1));
+        assertTrue(subAlbum1.soundClips.contains(clip1));
+        assertTrue(subAlbum2.soundClips.contains(clip1));
+        assertTrue(subAlbum3.soundClips.contains(clip1));
+
+
+        subAlbum1.removeAlbum(subAlbum2);
+
+        // subAlbum2 and subAlbum3 should be gone with their clip1
+        assertFalse(subAlbum1.containsSubAlbum(subAlbum2));
+        assertFalse(subAlbum2.containsSubAlbum(subAlbum3));
+        assertFalse(subAlbum2.containsSoundClip(clip1));
+        assertFalse(subAlbum3.containsSoundClip(clip1));
+
+        //subAlbum1 and rootAlbum should contain clip1 and subAlbum1 should still be in root
+        assertTrue(rootAlbum.containsSoundClip(clip1));
+        assertTrue(subAlbum1.containsSoundClip(clip1));
+        assertTrue(rootAlbum.containsSubAlbum(subAlbum1));
+
+    }
 
 
 }
