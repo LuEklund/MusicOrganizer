@@ -65,5 +65,8 @@ public class Album {
     boolean containsSubAlbum(Album album) {
         return subAlbums.contains(album);
     }
-
+    String ToString()
+    {
+        return name;
+    }
 }
