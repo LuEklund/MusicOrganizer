@@ -31,3 +31,5 @@ bin/
 ### Personal ###
 *.wav
 .idea/*
+*.iml
+*.xml
