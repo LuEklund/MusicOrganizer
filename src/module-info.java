@@ -1,0 +1,2 @@
+﻿module $MODULE_NAME$ {
+}
