@@ -22,6 +22,13 @@ public class Album {
             parent.addSoundClip(soundClip);
     }
 
+    public void addSoundClips(Set<SoundClip> inSoundClips) {
+        Set<SoundClip> temp = new HashSet<SoundClip>(inSoundClips);
+        this.soundClips.addAll(temp);
+        if (parent != null)
+            parent.addSoundClips(inSoundClips);
+    }
+
     // Remove sound clip from album and propagate to each sub album
     void removeSoundClip(SoundClip soundClip) {
         if (soundClips.contains(soundClip))
@@ -40,7 +47,7 @@ public class Album {
     }
 
     // Add sub album to album and set parent to this album
-    void addSubAlbum(Album album) {
+   public void addSubAlbum(Album album) {
         album.parent = this;
         subAlbums.add(album);
     }
@@ -67,7 +74,7 @@ public class Album {
     boolean containsSubAlbum(Album album) {
         return subAlbums.contains(album);
     }
-    String ToString()
+    public String toString()
     {
         return name;
     }

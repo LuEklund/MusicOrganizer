@@ -59,7 +59,7 @@ public class ButtonPaneHBox extends HBox {
 
 			@Override
 			public void handle(ActionEvent arg0) {
-			
+
 				controller.addNewAlbum();
 			}
 			

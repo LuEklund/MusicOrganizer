@@ -19,9 +19,8 @@ public class MusicOrganizerController {
 	
 	public MusicOrganizerController() {
 
-		// TODO: Create the root album for all sound clips
 		root = new Album("All Sound Clips");
-		
+
 		// Create the blocking queue
 		queue = new SoundClipBlockingQueue();
 				
@@ -36,7 +35,7 @@ public class MusicOrganizerController {
 	 */
 	public Set<SoundClip> loadSoundClips(String path) {
 		Set<SoundClip> clips = SoundClipLoader.loadSoundClips(path);
-		// TODO: Add the loaded sound clips to the root album
+		root.addSoundClips(clips);
 
 		return clips;
 	}
@@ -55,9 +54,16 @@ public class MusicOrganizerController {
 	/**
 	 * Adds an album to the Music Organizer
 	 */
-	public void addNewAlbum(){ //TODO Update parameters if needed - e.g. you might want to give the currently selected album as parameter
-		// TODO: Add your code here
-		
+	public void addNewAlbum(){
+		Album selectedAlbum = view.getSelectedAlbum();
+		if (selectedAlbum == null) return;
+
+		String newAlbumName = view.promptForAlbumName();
+		if (newAlbumName == null) return;
+
+		Album newAlbum = new Album(newAlbumName);
+		selectedAlbum.addSubAlbum(newAlbum);
+		view.onAlbumAdded(newAlbum);
 	}
 	
 	/**
