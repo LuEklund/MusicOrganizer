@@ -69,25 +69,36 @@ public class MusicOrganizerController {
 	/**
 	 * Removes an album from the Music Organizer
 	 */
-	public void deleteAlbum(){ //TODO Update parameters if needed
-		// TODO: Add your code here
-		
+	public void deleteAlbum(){
+		Album selectedAlbum = view.getSelectedAlbum();
+		if (selectedAlbum == null || selectedAlbum.getParent() == null) return;
+
+		selectedAlbum.getParent().removeAlbum(selectedAlbum);
+		view.onAlbumRemoved();
 	}
 	
 	/**
 	 * Adds sound clips to an album
 	 */
-	public void addSoundClips(){ //TODO Update parameters if needed
-		// TODO: Add your code here
-		
+	public void addSoundClips(){
+		Album selectedAlbum = view.getSelectedAlbum();
+		if (selectedAlbum == null) return;
+
+		List<SoundClip> selectedClips = view.getSelectedSoundClips();
+		selectedAlbum.addSoundClips(new HashSet<SoundClip>(selectedClips));
 	}
 	
 	/**
 	 * Removes sound clips from an album
 	 */
-	public void removeSoundClips(){ //TODO Update parameters if needed
-		// TODO: Add your code here
-		
+	public void removeSoundClips(){
+		// TODO Save activeAlbum instead of using selectedAlbum to remove sound clips?
+		Album selectedAlbum = view.getSelectedAlbum();
+		if (selectedAlbum == null) return;
+
+		List<SoundClip> selectedClips = view.getSelectedSoundClips();
+		selectedAlbum.removeSoundClips(new HashSet<SoundClip>(selectedClips));
+		view.onClipsUpdated();
 	}
 	
 	/**

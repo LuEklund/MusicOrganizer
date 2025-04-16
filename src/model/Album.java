@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Album {
-    Album parent = null;
-    String name = "Default";
-    String description = "Description";
-    Set<Album> subAlbums = new HashSet<Album>();
-    Set<SoundClip> soundClips = new HashSet<SoundClip>();;
+    private Album parent = null;
+    private String name = "Default";
+    private String description = "Description";
+    private Set<Album> subAlbums = new HashSet<Album>();
+    private Set<SoundClip> soundClips = new HashSet<SoundClip>();;
 
     // Constructors intialize name
     public Album(String inName) {
@@ -38,7 +38,12 @@ public class Album {
                 album.removeSoundClip(soundClip);
             }
         }
-
+    }
+    public void removeSoundClips(Set<SoundClip> inSoundClips) {
+        this.soundClips.removeAll(inSoundClips);
+        for (Album album : subAlbums) {
+            album.removeSoundClips(inSoundClips);
+        }
     }
 
     //Check if album contains sound clip
@@ -53,7 +58,7 @@ public class Album {
     }
 
     // Remove sub album from album
-    void removeAlbum(Album album) {
+    public void removeAlbum(Album album) {
         if (subAlbums.contains(album))
         {
             album.removeSubAlbums();
@@ -78,4 +83,8 @@ public class Album {
     {
         return name;
     }
+    public Album getParent() { return parent; }
+    public Set<SoundClip> getSoundClips() {return soundClips;}
+
+
 }

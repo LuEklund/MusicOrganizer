@@ -29,11 +29,11 @@ public class SoundClipListView extends ListView<SoundClip> {
 	 */
 	public void display(Album album){
 		this.getItems().clear();
-		
-		// TODO: 
-		// Add all SoundClips contained in the parameter album to 
+
+		// Add all SoundClips contained in the parameter album to
 		// the list of SoundClips 'clips' (the instance variable)
-		
+		clips = new ArrayList<>(album.getSoundClips());
+
 
 		
 		ObservableList<SoundClip> temp = FXCollections.observableList(clips);
