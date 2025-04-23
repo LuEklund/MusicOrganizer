@@ -86,6 +86,7 @@ public class MusicOrganizerController {
 
 		List<SoundClip> selectedClips = view.getSelectedSoundClips();
 		selectedAlbum.addSoundClips(new HashSet<SoundClip>(selectedClips));
+		view.onClipsUpdated();
 	}
 	
 	/**
@@ -109,9 +110,19 @@ public class MusicOrganizerController {
 	 */
 	public void playSoundClips(){
 		List<SoundClip> l = view.getSelectedSoundClips();
+		playSoundClips(l);
+	}
+	public void playSoundClips(List<SoundClip> l) {
 		queue.enqueue(l);
 		for(int i=0;i<l.size();i++) {
 			view.displayMessage("Playing " + l.get(i));
 		}
 	}
+	public void createNewWindow(){
+		if (view.getSelectedAlbum() == null) return;
+		view.createNewWindow();
+		System.out.println("createNewWindow");
+	}
+
+
 }

@@ -1,5 +1,6 @@
 package view;
 	
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,8 +34,10 @@ public class MusicOrganizerWindow extends Application {
 	private ButtonPaneHBox buttons;
 	private SoundClipListView soundClipTable;
 	private TextArea messages;
-	
-	
+
+	//TODO can have in View or should do some model stuff??
+	private List<AlbumWindow> albumWindows = new ArrayList<>();
+
 	public static void main(String[] args) {
 		controller = new MusicOrganizerController();
 		if (args.length == 0) {
@@ -223,7 +226,7 @@ public class MusicOrganizerWindow extends Application {
 		TreeItem<Album> toRemove = getSelectedTreeItem();
 		TreeItem<Album> parent = toRemove.getParent();
 		parent.getChildren().remove(toRemove);
-		
+		updateAllSubWindows();
 	}
 	
 	/**
@@ -233,6 +236,26 @@ public class MusicOrganizerWindow extends Application {
 	public void onClipsUpdated(){
 		Album a = getSelectedAlbum();
 		soundClipTable.display(a);
+		updateAllSubWindows();
 	}
-	
+
+
+	public void createNewWindow() {
+		if (getSelectedAlbum() == null) return;
+		albumWindows.add(new AlbumWindow(getSelectedAlbum(), controller));
+	}
+
+	private void updateAllSubWindows() {
+		List<AlbumWindow> windowsToRemove = new ArrayList<>();
+
+		for(AlbumWindow aw : albumWindows) {
+			aw.updateSoundClipTable();
+			if (aw.isEmpty()) {
+				aw.close();
+				windowsToRemove.add(aw);
+			}
+		}
+		albumWindows.removeAll(windowsToRemove);
+	}
+
 }
