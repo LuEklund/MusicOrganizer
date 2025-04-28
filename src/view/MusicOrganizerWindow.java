@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import Interface.Listener;
+import Interface.Subject;
 import controller.MusicOrganizerController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -25,7 +27,7 @@ import javafx.scene.layout.BorderPane;
 
 
 
-public class MusicOrganizerWindow extends Application {
+public class MusicOrganizerWindow extends Application implements Subject {
 	
 	private BorderPane bord;
 	private static MusicOrganizerController controller;
@@ -35,8 +37,6 @@ public class MusicOrganizerWindow extends Application {
 	private SoundClipListView soundClipTable;
 	private TextArea messages;
 
-	//TODO can have in View or should do some model stuff??
-	private List<AlbumWindow> albumWindows = new ArrayList<>();
 
 	public static void main(String[] args) {
 		controller = new MusicOrganizerController();
@@ -226,7 +226,7 @@ public class MusicOrganizerWindow extends Application {
 		TreeItem<Album> toRemove = getSelectedTreeItem();
 		TreeItem<Album> parent = toRemove.getParent();
 		parent.getChildren().remove(toRemove);
-		updateAllSubWindows();
+		updateisteners();
 	}
 	
 	/**
@@ -236,26 +236,28 @@ public class MusicOrganizerWindow extends Application {
 	public void onClipsUpdated(){
 		Album a = getSelectedAlbum();
 		soundClipTable.display(a);
-		updateAllSubWindows();
+		updateisteners();
 	}
 
 
 	public void createNewWindow() {
 		if (getSelectedAlbum() == null) return;
-		albumWindows.add(new AlbumWindow(getSelectedAlbum(), controller));
+		Listeners.add(new AlbumWindow(getSelectedAlbum(), controller));
 	}
 
-	private void updateAllSubWindows() {
-		List<AlbumWindow> windowsToRemove = new ArrayList<>();
+	public void updateisteners() {
+		List<Listener> windowsToRemove = new ArrayList<>();
 
-		for(AlbumWindow aw : albumWindows) {
-			aw.updateSoundClipTable();
-			if (aw.isEmpty()) {
-				aw.close();
-				windowsToRemove.add(aw);
+		for(Listener listener : Listeners) {
+			if (listener.shouldDestroy()) {
+				listener.destroy();
+				windowsToRemove.add(listener);
 			}
+			else
+				listener.update();
 		}
-		albumWindows.removeAll(windowsToRemove);
+		Listeners.removeAll(windowsToRemove);
 	}
+
 
 }

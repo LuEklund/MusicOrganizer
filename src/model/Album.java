@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Album {
+    public  Boolean isRemoved = false;
     private Album parent = null;
     private String name = "Default";
     private String description = "Description";
@@ -68,6 +69,7 @@ public class Album {
 
     // Remove all sub albums
     void removeSubAlbums() {
+        isRemoved = true;
         for (Album album : subAlbums) {
             album.removeSubAlbums();
         }

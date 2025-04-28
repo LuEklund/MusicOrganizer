@@ -1,5 +1,6 @@
 package view;
 
+import Interface.Listener;
 import controller.MusicOrganizerController;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -9,10 +10,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import model.Album;
 
-public class AlbumWindow {
+public class AlbumWindow implements Listener {
     private Album album;
     private MusicOrganizerController controller;
-    private BorderPane bord = new BorderPane();;
+    private BorderPane bord = new BorderPane();
     private SoundClipListView soundClipTable = new SoundClipListView();;
     private Stage window = new Stage();
 
@@ -32,13 +33,12 @@ public class AlbumWindow {
     window.setTitle(album.toString());
     window.setScene(scene);
 
-    updateSoundClipTable();
+    update();
 
 
     window.show();
     }
-
-    public void updateSoundClipTable(){
+    public void update(){
         soundClipTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         soundClipTable.display(album);
         soundClipTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -54,13 +54,12 @@ public class AlbumWindow {
 
         });
         soundClipTable.display(album);
-    }
+    };
 
-    public boolean isEmpty(){
-        return soundClipTable.getItems().isEmpty();
+    public boolean shouldDestroy() {
+        return album.isRemoved;
     }
-
-    public void close() {
+    public void destroy() {
         window.close();
     }
 }
