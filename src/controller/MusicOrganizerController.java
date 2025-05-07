@@ -63,7 +63,7 @@ public class MusicOrganizerController {
 
 		Album newAlbum = new Album(newAlbumName);
 		selectedAlbum.addSubAlbum(newAlbum);
-		view.onAlbumAdded(newAlbum);
+		view.onAlbumAdded(selectedAlbum, newAlbum);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class MusicOrganizerController {
 		if (selectedAlbum == null || selectedAlbum.getParent() == null) return;
 
 		selectedAlbum.getParent().removeAlbum(selectedAlbum);
-		view.onAlbumRemoved();
+		view.onAlbumRemoved(selectedAlbum);
 	}
 	
 	/**

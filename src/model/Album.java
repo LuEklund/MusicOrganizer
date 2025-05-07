@@ -1,9 +1,10 @@
 package model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Album {
+public class Album implements Serializable {
     public  Boolean isRemoved = false;
     private Album parent = null;
     private String name = "Default";
@@ -68,7 +69,7 @@ public class Album {
     }
 
     // Remove all sub albums
-    void removeSubAlbums() {
+    public void removeSubAlbums() {
         isRemoved = true;
         for (Album album : subAlbums) {
             album.removeSubAlbums();
@@ -89,4 +90,19 @@ public class Album {
     public Set<SoundClip> getSoundClips() {return soundClips;}
 
 
+    public void GenerateHTMLStructure(StringBuilder htmlContent) {
+        htmlContent.append("<h2>").append(name).append("</h2>\n<ul>\n");
+        for (SoundClip clip : soundClips) {
+            htmlContent.append("<li>").append(clip.toString()).append("</li>\n");
+        }
+
+        for (Album subAlbum : subAlbums) {
+            subAlbum.GenerateHTMLStructure(htmlContent);
+        }
+        htmlContent.append("</ul>\n");
+    }
+
+    public Set<Album> getSubAlbums() {
+        return subAlbums;
+    }
 }

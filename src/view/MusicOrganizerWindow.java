@@ -1,5 +1,6 @@
 package view;
 	
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,18 +11,15 @@ import controller.MusicOrganizerController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import model.Album;
 import model.SoundClip;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
@@ -59,10 +57,13 @@ public class MusicOrganizerWindow extends Application implements Subject {
 			primaryStage.setTitle("Music Organizer");
 			
 			bord = new BorderPane();
-			
+
+			VBox topContainer = new VBox();
+			topContainer.getChildren().add(CreeateMenuBar());
 			// Create buttons in the top of the GUI
 			buttons = new ButtonPaneHBox(controller, this);
-			bord.setTop(buttons);
+			topContainer.getChildren().add(buttons);
+			bord.setTop(topContainer);
 
 			// Create the tree in the left of the GUI
 			tree = createTreeView();
@@ -99,8 +100,99 @@ public class MusicOrganizerWindow extends Application implements Subject {
 		}
 		
 	}
-	
-	private TreeView<Album> createTreeView(){
+
+	private MenuBar CreeateMenuBar() {
+		MenuBar menuBar = new MenuBar();
+		Menu fileMenu = new Menu("File");
+
+		MenuItem saveMenuItem = new MenuItem("Save as...");
+		saveMenuItem.setOnAction(event -> openSaveDialog());
+		fileMenu.getItems().add(saveMenuItem);
+
+		MenuItem loadMenuItem = new MenuItem("Load Hierarchy");
+		loadMenuItem.setOnAction(event -> openLoadDialog());
+		fileMenu.getItems().add(loadMenuItem);
+
+		menuBar.getMenus().add(fileMenu);
+		return menuBar;
+	}
+	private void openSaveDialog() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save As...");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("HTML File", "*.html"),
+				new FileChooser.ExtensionFilter("Serialized Object", "*.ser")
+		);
+
+		File file = fileChooser.showSaveDialog(null);
+		if (file != null) {
+			if (file.getName().endsWith(".html")) {
+				exportToHTML(file);
+			} else if (file.getName().endsWith(".ser")) {
+				exportToObject(file);
+			}
+
+		}
+	}
+
+	private void exportToHTML(File file) {
+		Album root = controller.getRootAlbum();
+		StringBuilder htmlContent = new StringBuilder();
+		htmlContent.append("<!DOCTYPE html>" +
+				"\n<html><head><title>Music Organizer</title>" +
+				"</head><body>");
+		root.GenerateHTMLStructure(htmlContent);
+		htmlContent.append("</body></html>");
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write(htmlContent.toString());
+			displayMessage("Exported to HTML Successfully!");
+		} catch (IOException e) {
+			displayMessage("Error exporting to HTML: " + e.getMessage());
+		}
+
+	}
+	private void exportToObject(File file) {
+		try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file))) {
+			Album rootAlbum = controller.getRootAlbum();
+			os.writeObject(rootAlbum);
+			displayMessage("Hierarchy Exported Successfully!");
+		} catch (IOException e) {
+			displayMessage("Error Exporting Hierarchy: " + e.getMessage());
+		}
+	}
+
+	private void openLoadDialog() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Load Hierarchy");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Serialized Object", "*.ser")
+		);
+		File file = fileChooser.showOpenDialog(null);
+		if (file != null) {
+			importFromSerializedObject(file);
+		}
+
+	}
+	private void importFromSerializedObject(File file) {
+		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+			Album importedRoot = (Album) in.readObject();
+
+			controller.getRootAlbum().getSubAlbums().clear();
+			for (Album subAlbum : importedRoot.getSubAlbums()) {
+				controller.getRootAlbum().addSubAlbum(subAlbum);
+			}
+
+			displayMessage("Loaded hierarchy successfully!");
+			createTreeView();
+//			onClipsUpdated();
+		} catch (IOException | ClassNotFoundException e) {
+			displayMessage("Error loading hierarchy: " + e.getMessage());
+		}
+
+	}
+
+		private TreeView<Album> createTreeView(){
 		rootNode = new TreeItem<>(controller.getRootAlbum());
 		TreeView<Album> v = new TreeView<>(rootNode);
 		
@@ -212,21 +304,41 @@ public class MusicOrganizerWindow extends Application implements Subject {
 	 * Updates the album hierarchy with a new album
 	 * @param newAlbum
 	 */
-	public void onAlbumAdded(Album newAlbum){
-		TreeItem<Album> parentItem = getSelectedTreeItem();
-		TreeItem<Album> newItem = new TreeItem<>(newAlbum);
-		parentItem.getChildren().add(newItem);
-		parentItem.setExpanded(true); // automatically expand the parent node in the tree
+	public void onAlbumAdded(Album parent, Album newAlbum){
+		TreeItem<Album> root = tree.getRoot();
+		TreeItem<Album> parentNode = findAlbumNode(parent, root);
+
+		parentNode.getChildren().add(new TreeItem<>(newAlbum));
+		parentNode.setExpanded(true); // automatically expand the parent node in the tree
 	}
 	
 	/**
 	 * Updates the album hierarchy by removing an album from it
 	 */
-	public void onAlbumRemoved(){
-		TreeItem<Album> toRemove = getSelectedTreeItem();
-		TreeItem<Album> parent = toRemove.getParent();
-		parent.getChildren().remove(toRemove);
-		updateisteners();
+	public void onAlbumRemoved(Album toRemove){
+
+		TreeItem<Album> root = tree.getRoot();
+
+		TreeItem<Album> nodeToRemove = findAlbumNode(toRemove, root);
+		nodeToRemove.getParent().getChildren().remove(nodeToRemove);
+
+	}
+
+	private TreeItem<Album> findAlbumNode(Album albumToFind, TreeItem<Album> root) {
+
+		// recursive method to locate a node that contains a specific album in the TreeView
+
+		if(root.getValue().equals(albumToFind)) {
+			return root;
+		}
+
+		for(TreeItem<Album> node : root.getChildren()) {
+			TreeItem<Album> item = findAlbumNode(albumToFind, node);
+			if(item != null)
+				return item;
+		}
+
+		return null;
 	}
 	
 	/**

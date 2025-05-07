@@ -20,24 +20,23 @@ public class AlbumWindow implements Listener {
 
 
     public AlbumWindow(Album album, MusicOrganizerController controller) {
-    this.album = album;
-    this.controller = controller;
-    window.setWidth(300);
-    window.setHeight(600);
+        this.album = album;
+        this.controller = controller;
+        window.setWidth(300);
+        window.setHeight(600);
 
 
-    bord.setCenter(soundClipTable);
-    Scene scene = new Scene(bord);
-    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+        bord.setCenter(soundClipTable);
+        Scene scene = new Scene(bord);
+        scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
-    window.setTitle(album.toString());
-    window.setScene(scene);
+        window.setTitle(album.toString());
+        window.setScene(scene);
 
-    update();
-
-
-    window.show();
+        update();
+        window.show();
     }
+
     public void update(){
         soundClipTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         soundClipTable.display(album);
@@ -59,6 +58,7 @@ public class AlbumWindow implements Listener {
     public boolean shouldDestroy() {
         return album.isRemoved;
     }
+
     public void destroy() {
         window.close();
     }
