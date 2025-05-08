@@ -179,15 +179,23 @@ public class MusicOrganizerWindow extends Application implements Subject {
 			Album importedRoot = (Album) in.readObject();
 
 			controller.getRootAlbum().getSubAlbums().clear();
-			for (Album subAlbum : importedRoot.getSubAlbums()) {
-				controller.getRootAlbum().addSubAlbum(subAlbum);
+			tree.getRoot().getChildren().clear();
+			for (Listener listener : Listeners) {
+				listener.destroy();
 			}
+			Listeners.clear();
 
-			displayMessage("Loaded hierarchy successfully!");
-			createTreeView();
-//			onClipsUpdated();
+			displayMessage("Loaded Hierarchy SUccessfully!");
+			loadInImportedAlbums(controller.getRootAlbum(), importedRoot);
 		} catch (IOException | ClassNotFoundException e) {
-			displayMessage("Error loading hierarchy: " + e.getMessage());
+			displayMessage("Error Loading Hierarchy: " + e.getMessage());
+		}
+	}
+	private void loadInImportedAlbums(Album currentParent, Album albumToLoad) {
+		for (Album subAlbum : albumToLoad.getSubAlbums()) {
+			currentParent.addSubAlbum(subAlbum);
+			onAlbumAdded(currentParent, subAlbum);
+			loadInImportedAlbums(subAlbum, subAlbum);
 		}
 
 	}
@@ -348,7 +356,7 @@ public class MusicOrganizerWindow extends Application implements Subject {
 	public void onClipsUpdated(){
 		Album a = getSelectedAlbum();
 		soundClipTable.display(a);
-		updateisteners();
+		updateListeners();
 	}
 
 
@@ -357,7 +365,7 @@ public class MusicOrganizerWindow extends Application implements Subject {
 		Listeners.add(new AlbumWindow(getSelectedAlbum(), controller));
 	}
 
-	public void updateisteners() {
+	public void updateListeners() {
 		List<Listener> windowsToRemove = new ArrayList<>();
 
 		for(Listener listener : Listeners) {
