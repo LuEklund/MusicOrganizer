@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import Interface.ExportStrategy;
 import Interface.Listener;
 import Interface.Subject;
 import controller.MusicOrganizerController;
@@ -22,7 +23,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-
+import model.export.ExportStrategyFactory;
 
 
 public class MusicOrganizerWindow extends Application implements Subject {
@@ -126,39 +127,17 @@ public class MusicOrganizerWindow extends Application implements Subject {
 
 		File file = fileChooser.showSaveDialog(null);
 		if (file != null) {
-			if (file.getName().endsWith(".html")) {
-				exportToHTML(file);
-			} else if (file.getName().endsWith(".ser")) {
-				exportToObject(file);
-			}
-
+			exportAlbum(file);
 		}
 	}
 
-	private void exportToHTML(File file) {
-		Album root = controller.getRootAlbum();
-		StringBuilder htmlContent = new StringBuilder();
-		htmlContent.append("<!DOCTYPE html>" +
-				"\n<html><head><title>Music Organizer</title>" +
-				"</head><body>");
-		root.GenerateHTMLStructure(htmlContent);
-		htmlContent.append("</body></html>");
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			writer.write(htmlContent.toString());
-			displayMessage("Exported to HTML Successfully!");
-		} catch (IOException e) {
-			displayMessage("Error exporting to HTML: " + e.getMessage());
-		}
-
-	}
-	private void exportToObject(File file) {
-		try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file))) {
-			Album rootAlbum = controller.getRootAlbum();
-			os.writeObject(rootAlbum);
-			displayMessage("Hierarchy Exported Successfully!");
-		} catch (IOException e) {
-			displayMessage("Error Exporting Hierarchy: " + e.getMessage());
+	private void exportAlbum(File file) {
+		try {
+			ExportStrategy strategy = ExportStrategyFactory.getExportStrategy(file);
+			strategy.export(controller.getRootAlbum(), file);
+			displayMessage("Export successful!");
+		} catch (Exception e) {
+			displayMessage("Error exporting: " + e.getMessage());
 		}
 	}
 
